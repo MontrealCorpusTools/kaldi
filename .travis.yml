@@ -12,9 +12,25 @@ branches:
   only:
   - master
   
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.8
+    packages:
+      - g++-4.9
+      - gfortran-4.9
+      - liblapack-dev
+      - clang-3.8
+      - sox
+  
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install sox python3; fi
+  
 before_script:
   - cd tools
-  #- extras/check_dependencies.sh
+  - extras/check_dependencies.sh
   - make -j 4
   - make openblas
   - cd ..
