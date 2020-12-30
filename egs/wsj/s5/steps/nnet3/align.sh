@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright 2012  Brno University of Technology (Author: Karel Vesely)
 #           2013  Johns Hopkins University (Author: Daniel Povey)
 #           2015  Vijayaditya Peddinti
@@ -53,14 +53,13 @@ dir=$4
 oov=`cat $lang/oov.int` || exit 1;
 mkdir -p $dir/log
 echo $nj > $dir/num_jobs
-touch $dir/per_utt
-sdata=$data/split${nj}utt
+sdata=$data/split${nj}
 [[ -d $sdata && $data/feats.scp -ot $sdata ]] || \
-   split_data.sh --per-utt $data $nj || exit 1;
+   split_data.sh $data $nj || exit 1;
 
 if $use_gpu; then
   queue_opt="--gpu 1"
-  gpu_opt="--use-gpu=yes"
+  gpu_opt="--use-gpu=wait"
 else
   queue_opt=""
   gpu_opt="--use-gpu=no"

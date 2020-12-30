@@ -23,7 +23,12 @@ addons:
       - liblapack-dev
       - clang-3.8
       - sox
-  
+
+branches:
+  only:
+    - master
+    - pybind11
+
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install sox python3; fi
@@ -36,14 +41,13 @@ before_script:
   - cd ..
   
 script:
-  - make -j 4
-  
-deploy:
-  provider: releases
-  api_key:
-    secure: sYKHcvBGCKvj5sX4yYLgEXhgEljCeuf7zI4R3T3vFzUjBa28brPODbRLC0oGuFbRa2dsLObNgYnDbH6YYxA6jFnf+gbUklfVJ8HRwji62IYcB/MPRZKT4ncb2Kqj2tHwgn8kGog/wstmH1Ay/d/A4zo8o+ugNz452fSL6ZMtt/jCXQsWTzoyus+s986KC74K68RKUxBoCLvXg1oa6y4l9D+rU/47iLgEfIle4gpn1PYphOqEHmrgix8eZo6JPuE5LGmtGaju3emM/S4jeblVgPdR+8rbXVnogi3lsTO5ScnwK0fyVaDlswkd0q4xlePhbkbiSX/Ym9y+89n22J9wQ57fXyTW0LMHdLEbCWdQbi7o2cTbfmHNsad21VN5aGHMIWXm2JFpbdF8VplWENhJ61ZmQ8eFpT/zfwvagO4/lfvmjxyeiZ2Vygqmpd07gosdICSwkW/lUVCatdBpLIw2vpsOaq0OffQAFexhqmdiI0kPS/DhKoSGMjpEiQSMeQ/0ns+9WJLQM3CA8Dv0N7UjBx76Il10WQQ/Wg9gaCU0SJOgJ1hQzUx2TPQ8bg5DXJUIKLIpmi9dmuXqx2MimKZosHnp1a6eYeGHHk125TMGXH19X8tvRVLoUn82m/jirwisWlPrzkHzsGd/otXMEgZef5oGUarq4LOpJX76pm1BoSY=
-  file: kaldi_binaries.zip
-  skip_cleanup: true
-  on:
-    repo: MontrealCorpusTools/kaldi
-    tags: true
+  # See http://petereisentraut.blogspot.com/2011/05/ccache-and-clang.html and
+  # http://peter.eisentraut.org/blog/2014/12/01/ccache-and-clang-part-3/
+  # for the explanation why extra switches needed for clang with ccache.
+  - CXX="ccache clang++-3.8 -Qunused-arguments -fcolor-diagnostics -Wno-tautological-compare"
+    CFLAGS=""
+    LDFLAGS="-llapack -Wl,-fuse-ld=gold"
+    INCDIRS="$XROOT/usr/include"
+    LIBDIRS="$XROOT/usr/lib"
+      tools/extras/travis_script.sh
+#   To troubleshoot cache, add to above: CI_TARGETS=util CCACHE_LOGFILE=~/ccache.log
